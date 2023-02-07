@@ -1,28 +1,39 @@
-export const actionCreator = type => payload => {{
+export const actionCreator = type => payload => ({
   type,
   payload,
-}}
+});
 
-export function createStore(reducer) {
+export function createStore(reducer, middlewares = []) {
   let state;
-  let handler = [];
+  const handlers = [];
 
   function dispatch(action) {
     state = reducer(state, action);
-    handler.forEach(handler => handler());
-  }
-
-  function subscribe(handler) {
-    handler.push(handler);
+    handlers.forEach(handler => handler());
   }
 
   function getState() {
     return state;
   }
 
-  return {
-    dispatch,
+  function subscribe(handler) {
+    handlers.push(handler);
+  }
+
+  const store = {
     getState,
     subscribe,
+    dispatch,
   };
+
+  middlewares = Array.from(middlewares).reverse()
+  let lastDispatch = dispatch;
+  
+  middlewares.forEach(middleware => {
+    lastDispatch = middleware(store)(lastDispatch)
+  });
+
+  store.dispatch = lastDispatch;
+
+  return store;
 }
