@@ -1,9 +1,14 @@
-function createStore() {
+export const actionCreator = type => payload => {{
+  type,
+  payload,
+}}
+
+export function createStore(reducer) {
   let state;
   let handler = [];
 
-  function send(action) {
-    state = worker(state, action);
+  function dispatch(action) {
+    state = reducer(state, action);
     handler.forEach(handler => handler());
   }
 
@@ -16,27 +21,8 @@ function createStore() {
   }
 
   return {
-    send,
+    dispatch,
     getState,
     subscribe,
   };
 }
-
-function worker(state = { count: 0 }, action) {
-  // do something
-  switch(action.type) {
-    case 'increase':
-      return {...state, count : state.count +1 };
-    default :
-      return {...state}
-  }
-}
-
-const store = createStore(worker);
-
-store.subscribe(function() {
-  console.log(store.getState());
-});
-
-store.send({ type: 'increase' });
-store.send({ type: 'increase' });
